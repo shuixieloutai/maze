@@ -1,5 +1,25 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 18 15:42:27 2021
+
+@author: Yichen
+"""
+
+
+
 import sys
 import matplotlib.pyplot as plt
+
+#node class
+class Node:
+    def __init__(self, x, y, cost, parent):
+        self.x = x # x
+        self.y = y # y
+        self.cost = cost # shortest cost from the start 
+        self.parent = parent # index of the previous node
+
+    def __str__(self):
+        return str(self.x) + "," + str(self.y) + "," + str(self.cost) + "," + str(self.parent)
 
 def MazeReader(file_path):
     with open(file_path) as f:
@@ -52,6 +72,16 @@ def draw_map(index_wall, index_start, index_end):
     #plt.plot(index_wall[:,0],index_wall[:,1],"ks")
     #gridobj.set(xlim=(0.5,7.5),ylim=(0,50)) 
     
+
+def draw_search(closedset, index_wall):
+    path=list(closedset)
+    for i in range(len(path)):
+        plt.pause(0.01)
+        draw_map(index_wall, index_start, index_end)
+        for j in range(i):
+            index=path[j]
+            plt.plot(closedset[index].y, max(index_wall[:,0])-closedset[index].x, "ys")
+
 def draw_path(endnode, endpoint, index_wall):
     path_x, path_y=[endnode[endpoint].x], [endnode[endpoint].y]
     parent = endnode[endpoint].parent
@@ -63,16 +93,6 @@ def draw_path(endnode, endpoint, index_wall):
     plt.plot(path_y, max(index_wall[:,0])-path_x,"-r")
     
 
-#node class
-class Node:
-    def __init__(self, x, y, cost, parent):
-        self.x = x # x
-        self.y = y # y
-        self.cost = cost # shortest cost from the start 
-        self.parent = parent # index of the previous node
-
-    def __str__(self):
-        return str(self.x) + "," + str(self.y) + "," + str(self.cost) + "," + str(self.parent)
 
 #return judgement and index
 def verifyend(current, endnode):
@@ -182,4 +202,7 @@ while True:
             openset[node_id] = node
             
 draw_map(index_wall, index_start, index_end)
+
+draw_search(closedset, index_wall)
+
 draw_path(endnode, endpoint, index_wall)
