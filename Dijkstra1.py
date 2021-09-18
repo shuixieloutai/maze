@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Sep 18 15:42:27 2021
-
-@author: Yichen
-"""
-
-
-
 import sys
 import matplotlib.pyplot as plt
 
@@ -78,7 +69,7 @@ def draw_search(closedset, index_wall):
     for i in range(len(path)):
         plt.pause(0.01)
         draw_map(index_wall, index_start, index_end)
-        for j in range(i):
+        for j in range(i+1):
             index=path[j]
             plt.plot(closedset[index].y, max(index_wall[:,0])-closedset[index].x, "ys")
 
@@ -167,6 +158,11 @@ while True:
     current= openset[current_id]
     #print("current:",current)
     
+    
+    #move the current node into closedset
+    del openset[current_id]
+    closedset[current_id] = current
+    
     #judge if the end node
     ver, ind_end=verifyend(current, endnode)
     if ver:
@@ -175,11 +171,6 @@ while True:
         endnode[ind_end].cost = current.cost
         endpoint=ind_end
         break
-        
-    
-    #move the current node into closedset
-    del openset[current_id]
-    closedset[current_id] = current
     
     #Maintain boundary vector
     for i in range(len(action)):
