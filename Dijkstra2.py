@@ -1,22 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Sep 19 22:34:35 2021
+
+@author: ASUS
+"""
+
+
 import sys
 import matplotlib.pyplot as plt
-import time
 import numpy as np
-
+import time
 
 file_path='maze-2.txt'
 
 #node class
 class Node:
-    def __init__(self, x, y, cost, parent):
+    def __init__(self, x, y, cost, parent_x, parent_y):
         self.x = x # x
         self.y = y # y
         self.cost = cost # shortest cost from the start 
-        self.parent = parent # index of the previous node
+        self.parent_x = parent_x # index of the previous node
+        self.parent_y = parent_y
 
     def __str__(self):
-        return "x:"+str(self.x) + ", " + "y:"+str(self.y) + ", " + "cost:"+str(self.cost) + ", " + "parent:"+str(self.parent)
-
+        return "x:"+str(self.x) + ", " + "y:"+str(self.y) + ", " + "cost:"+str(self.cost) + ", " + "parent_x:"+str(self.parent_x) + ", " + "parent_y:"+str(self.parent_y)
+    
 def MazeReader(file_path):
     with open(file_path) as f:
         lines=f.readlines()
@@ -70,25 +78,25 @@ def draw_map(index_wall, index_start, index_end):
     
 
 def draw_search(closedset, index_wall):
-    path=list(closedset)
-    for i in range(len(path)):
+    for i in range(len(closedset)):
         plt.pause(0.01)
         draw_map(index_wall, index_start, index_end)
         for j in range(i+1):
-            index=path[j]
-            plt.plot(closedset[index].y, max(index_wall[:,0])-closedset[index].x, "ys")
+            plt.plot(closedset[j].y, max(index_wall[:,0])-closedset[j].x, "ys")
 
 def draw_path(endnode, endpoint, index_wall):
     path_x, path_y=[endnode[endpoint].x], [endnode[endpoint].y]
-    parent = endnode[endpoint].parent
-    while parent!=-1:
-        node=closedset[parent]
-        path_x.append(node.x)
-        path_y.append(node.y)
-        parent=node.parent
+    parent_x=endnode[endpoint].parent_x
+    parent_y=endnode[endpoint].parent_y
+    while parent_x!=-1:
+        for i in range(len(closedset)):
+            if closedset[i].x==parent_x and closedset[i].y==parent_y:
+                parent_x=closedset[i].parent_x
+                parent_y=closedset[i].parent_y
+                path_x.append(closedset[i].x)
+                path_y.append(closedset[i].y)
     plt.plot(path_y, max(index_wall[:,0])-path_x,"-r")
     
-
 
 #return judgement and index
 def verifyend(current, endnode):
@@ -116,6 +124,7 @@ def index_node(node, width):
     index_node=node.x*width+node.y
     return index_node
 
+
 #read the data from .txt file
 lines=MazeReader(file_path)
 
@@ -131,71 +140,130 @@ print(maze)
 width=maze.shape[1]
 
 #build  start node and endnode
-startnode=Node(index_start[0,0],index_start[0,1],0,-1)
-endnode=dict()
+startnode=Node(index_start[0,0],index_start[0,1],0,-1,-1)
+endnode=[]
 for i in range(len(index_end)):
-    endnode[i]=Node(index_end[i,0],index_end[i,1],0,-1)
+    endnode.append(Node(index_end[i,0],index_end[i,1],0,-1,-1))
     
 #node  has been checked
-openset=dict()
+openset=[]
 #node has not been checked
-closedset = dict()
+closedset = []
+
+#heap operation
+def shift_down(heap, k):
+    heap_len=len(heap)
+    while k < heap_len:
+        if 2*k+2 < heap_len:
+            if heap[k].cost<heap[2*k+1].cost or heap[k].cost<heap[2*k+2].cost:
+                t = heap[k]
+                if heap[2*k+1].cost<heap[2*k+2].cost:
+                    heap[k] = heap[2 * k + 1]
+                    heap[2 * k + 1] = t
+                    k = 2 * k + 1
+                else:
+                    t = heap[k]
+                    heap[k] = heap[2 * k + 2]
+                    heap[2 * k + 2] = t
+                    k = 2 * k + 2
+            else:
+                break
+        elif 2*k+2 == heap_len:
+            if heap[k].cost<heap[2*k+1].cost:
+                t = heap[k]
+                heap[k] = heap[2 * k + 1]
+                heap[2 * k + 1] = t
+                k = 2 * k + 1 
+            else:
+                break
+        else:
+            break
+            
+    return heap
+
+def shift_up(heap, k):
+    while k!=0:
+        if heap[k].cost < heap[int((k - 1) / 2)].cost:
+            t=t = heap[k]
+            heap[k] = heap[int((k - 1) / 2)]
+            heap[int((k - 1) / 2)] = t
+            k = int((k - 1) / 2)
+        else:
+            break
+    return heap
+
+def heap_pop(heap):
+    node=heap[0]
+    heap[0]=heap[-1]
+    del(heap[-1])
+    heap=shift_down(heap, 0)
+    return node
+    
+def heap_insert(heap, node):
+    heap.append(node)
+    heap=shift_up(heap, len(heap)-1)
+    return heap
 
 # add start node
-openset[index_node(startnode, width)] = startnode
+openset.append(startnode)
 
 start=time.time()
+
 #draw_map()
 endpoint=-1
 while True:
     #if search all point, end
-    if openset=={}:
+    if openset==[]:
         print("We have searched all reachable nodes ")
         break
     
     # find min cost set in openset
-    current_id = min(openset, key=lambda n: openset[n].cost)
-    #print(current_id)
-    current= openset[current_id]
+    current=heap_pop(openset)
+    
+    current_id=index_node(current, width)
     #print("current:",current)
     
-    
-    #move the current node into closedset
-    del openset[current_id]
-    closedset[current_id] = current
+    closedset.append(current)
     
     #judge if the end node
-    ver, ind_end=verifyend(current, endnode)
+    ver, end=verifyend(current, endnode)
     if ver:
-        print("\nWe recive the final goal")
-        endnode[ind_end].parent = current.parent
-        endnode[ind_end].cost = current.cost
-        endpoint=ind_end
+        print("We recive the final goal")
+        endnode[end].parent_x = current.parent_x
+        endnode[end].parent_y = current.parent_y
+        endnode[end].cost = current.cost
+        endpoint=end
         break
     
     #Maintain boundary vector
     for i in range(len(action)):
-        node=Node(current.x+action[i][0], current.y+action[i][1], current.cost + action[i][2], current_id)
+        node=Node(current.x+action[i][0], current.y+action[i][1], current.cost + action[i][2], current.x, current.y)
         node_id = index_node(node, width)
         #if the node is wall, next
         if verifywall(node,maze):
             continue
-            
-        if node_id in closedset:
+        
+        flag=0
+        for j in range(len(closedset)):
+            if node.x==closedset[j].x and node.y==closedset[j].y:
+                flag=1
+                continue
+        if flag==1:
             continue
-
-        if node_id in openset:
-            
-            if openset[node_id].cost > node.cost:
-                openset[node_id].cost = node.cost
-                openset[node_id].parent = current_id
-        # add in the openset
-        else:
-            openset[node_id] = node
-            
-end=time.time()
-            
-draw_map(index_wall, index_start, index_end)
+        
+        flag=0
+        for j in range(len(openset)):
+            if node.x==openset[j].x and node.y==openset[j].y:
+                flag=1
+                if openset[j].cost > node.cost:
+                    openset[j].cost = node.cost
+                    openset[j].parent = current_id
+                    openset=shift_up(openset, k)
+                # add in the openset
+        if flag==0:
+            openset=heap_insert(openset, node)
+    
+end=time.time()            
 
 draw_search(closedset, index_wall)
 
