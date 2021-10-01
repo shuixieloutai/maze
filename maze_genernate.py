@@ -75,7 +75,7 @@ class Maze:
     def verifyend(self, verify_node):
         for i in range(len(self.endnode)):
             if self.endnode[i]==verify_node:
-                endpoint=i
+                self.endpoint=i
                 return True
         return False
     
@@ -85,6 +85,15 @@ class Maze:
         else:
             return False
         
+    def reset(self):
+        for i in range(len(self.maze)):
+            for j in range(len(self.maze[0])):
+                self.maze[i][j].cost=float('inf')
+                self.maze[i][j].parent_x=-1
+                self.maze[i][j].parent_y=-1
+                self.maze[i][j].visited=0
+        self.startnode.cost=0
+        self.endpoint=-1
 
 def maze(file_path):
     maze=Maze()
