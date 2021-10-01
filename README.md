@@ -6,5 +6,7 @@ Astar(maze)
 # Read a maze file and load
 maze(file_path) 
 
+# test 
+test.py
 
 
