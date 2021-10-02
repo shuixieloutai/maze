@@ -9,4 +9,7 @@ maze(file_path)
 # test 
 test.py
 
+# shortest path 
+maze.endpoint  
+maze.endnode(maze.endpoint)
 
