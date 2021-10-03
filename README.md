@@ -11,5 +11,5 @@ test.py
 
 # shortest path 
 maze.endpoint  
-maze.endnode(maze.endpoint)
+maze.endnode[maze.endpoint]
 
