@@ -1,6 +1,6 @@
 #  five types of algorithm  
-Astar, DFS, BFS, Dijkstra, IDS 
-for emample  
+Astar, DFS, BFS, Dijkstra, IDS   
+for example  
 Astar(maze)
   
 # Read a maze file and load
