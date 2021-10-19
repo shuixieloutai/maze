@@ -1,4 +1,4 @@
-from maze_generate import maze
+from maze_genernate import maze
 from data_structure import heap, FIFO, FILO, priority_queue, Manhattan_Distance, Euclidean_distance
 
 #file_path='maze-2.txt'
@@ -24,7 +24,7 @@ def BFS(maze, output=False):
 
     while True:
         #if search all point, end
-        if openset==[]:
+        if openset.queue==[]:
             if output:
                 print("We have searched all reachable nodes ")
             break
@@ -121,7 +121,7 @@ def DFS(maze, output=False):
 
     while True:
         #if search all point, end
-        if openset==[]:
+        if openset.queue==[]:
             if output:
                 print("We have searched all reachable nodes ")
             break
@@ -218,7 +218,7 @@ def Astar(maze, output=False):
     
     while True:
         #if search all point, end
-        if openset==[]:
+        if openset.queue==[]:
             if output:
                 print("We have searched all reachable nodes ")
             break
