@@ -1,4 +1,4 @@
-from maze_genernate import maze
+from maze_generate import maze
 from data_structure import heap, FIFO, FILO, priority_queue, Manhattan_Distance, Euclidean_distance
 
 #file_path='maze-2.txt'
@@ -12,7 +12,7 @@ from data_structure import heap, FIFO, FILO, priority_queue, Manhattan_Distance,
 
 
 #### BFS
-def BFS(maze):
+def BFS(maze, output=False):
     #node  has been checked
     openset=FIFO()
     #node has not been checked
@@ -24,8 +24,9 @@ def BFS(maze):
 
     while True:
         #if search all point, end
-        if openset==[]:
-            print("We have searched all reachable nodes ")
+        if openset.queue==[]:
+            if output:
+                print("We have searched all reachable nodes ")
             break
 
         # find min cost set in openset
@@ -35,7 +36,8 @@ def BFS(maze):
         closedset.append(current)
 
         if maze.verifyend(current):
-            print("We recive the final goal")
+            if output:
+                print("We recive the final goal")
             break
 
         for i in range(len(maze.action)):
@@ -54,7 +56,7 @@ def BFS(maze):
     return closedset
 
 #### Dijkstra/UCS
-def Dijkstra(maze):
+def Dijkstra(maze, output=False):
     #node  has been checked
     openset=heap()
     #node has not been checked
@@ -67,17 +69,19 @@ def Dijkstra(maze):
     while True:
         #if search all point, end
         if openset.heap==[]:
-            print("We have searched all reachable nodes ")
+            if output:
+                print("We have searched all reachable nodes ")
             break
 
         # find min cost set in openset
         current=openset.pop()
 
-        current.visited=1
+        current.visited=2
         closedset.append(current)
 
         if maze.verifyend(current):
-            print("We recive the final goal")
+            if output:
+                print("We recive the final goal")
             break
 
         for i in range(len(maze.action)):
@@ -88,7 +92,7 @@ def Dijkstra(maze):
                 continue
 
             if not node.visited:
-                if openset.heap.count(node)>0:
+                if node.visited==1:
                     index=openset.heap.index(node)
                     #print(index)
                     if node.cost>current.cost+maze.action[i][2]:
@@ -105,7 +109,7 @@ def Dijkstra(maze):
     return closedset
 
 #### DFS
-def DFS(maze):
+def DFS(maze, output=False):
     #node  has been checked
     openset=FILO()
     #node has not been checked
@@ -117,8 +121,9 @@ def DFS(maze):
 
     while True:
         #if search all point, end
-        if openset==[]:
-            print("We have searched all reachable nodes ")
+        if openset.queue==[]:
+            if output:
+                print("We have searched all reachable nodes ")
             break
 
         # find min cost set in openset
@@ -128,7 +133,8 @@ def DFS(maze):
         closedset.append(current)
 
         if maze.verifyend(current):
-            print("We recive the final goal")
+            if output:
+                print("We recive the final goal")
             break
 
         for i in range(len(maze.action)):
@@ -148,7 +154,7 @@ def DFS(maze):
 
 
 ####  IDS
-def IDS(maze):
+def IDS(maze, output=False):
     #node  has been checked
     openset=FILO()
     #node has not been checked
@@ -174,7 +180,8 @@ def IDS(maze):
             closedset.append(current)
 
             if maze.verifyend(current):
-                print("We recive the final goal")
+                if output:
+                    print("We recive the final goal")
                 break
 
             for i in range(len(maze.action)):
@@ -198,7 +205,7 @@ def IDS(maze):
     return closedset
 
 #### A*
-def Astar(maze):
+def Astar(maze, output=False):
     #node  has been checked
     openset=priority_queue()
     #node has not been checked
@@ -211,8 +218,9 @@ def Astar(maze):
     
     while True:
         #if search all point, end
-        if openset==[]:
-            print("We have searched all reachable nodes ")
+        if openset.queue==[]:
+            if output:
+                print("We have searched all reachable nodes ")
             break
 
         # find min cost set in openset
@@ -222,7 +230,8 @@ def Astar(maze):
         closedset.append(current)
 
         if maze.verifyend(current):
-            print("We recive the final goal")
+            if output:
+                print("We recive the final goal")
             break
 
         for i in range(len(maze.action)):
@@ -240,7 +249,7 @@ def Astar(maze):
                 openset.push(node)
                 node.visited=1
             elif openset.queue.count(node)>0:
-                index=openset.queue.index(node)
+                #index=openset.queue.index(node)
                 if node.value>current.cost+maze.action[i][2]+Euclidean_distance(node, maze.endnode[0]):
                     node.cost=current.cost+maze.action[i][2]
                     node.parent_x=current.x
