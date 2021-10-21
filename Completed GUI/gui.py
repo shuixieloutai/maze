@@ -184,7 +184,7 @@ class Main_Menu(object):
         current_time = round(time.time() * 1000)  #get current time in millis
         self.get_alg_result() # get the result of the algorithm, saves to self.closed_set
         elapsed_time = round(time.time() * 1000) - current_time
-        self.solveTimeLbl.setText("Solve Time: " + str(elapsed_time / 1000.0) + " sec")
+        self.solveTimeLbl.setText("Solve Time: " + str(elapsed_time) + " ms")
         self.ctrl_groupBox.show()
         self.statusLabel.setText("Algorithm Solved using " + self.selected_alg)
         self.maze_sim.closed_set = self.closed_set # pass the solved set to the GUI for animations
@@ -208,10 +208,41 @@ class Main_Menu(object):
 
     def update_solve_status(self):
         if self.cur_step == len(self.closed_set):
-            self.statusLabel.setText("Target found; Reachable in "+ str(len(self.closed_set)) + " steps.")
+            print("finding shortest path")
+            shortest_path = self.find_shortest_path(self.maze)
+
+            self.maze_sim.plot_shortest_path(shortest_path)
+            self.statusLabel.setText("The target is reachable in " + str(len(shortest_path)) + " steps.")
+
+
+
 
         else:
             self.statusLabel.setText("Not found: Step " + str(self.cur_step) + "/" + str(len(self.closed_set)))
+
+    def find_shortest_path(self,maze):
+        shortest_path = []
+        length_shortest=0
+        x=-1
+        y=-1
+        if maze.endpoint>=0:
+            shortest_path.append((maze.endnode[maze.endpoint].x, maze.endnode[maze.endpoint].y))
+            shortest_path.append((maze.endnode[maze.endpoint].parent_x, maze.endnode[maze.endpoint].parent_y))
+            x,y=maze.endnode[maze.endpoint].parent_x,maze.endnode[maze.endpoint].parent_y
+            while 1:
+                if maze.maze[x][y].parent_x==-1: # this is a start node, its done
+                    # shortest_path.append((maze.maze[x][y].parent_x,maze.maze[x][y].parent_y))
+                    break
+                
+                x,y=maze.maze[x][y].parent_x,maze.maze[x][y].parent_y
+                shortest_path.append((x,y))
+                
+                length_shortest+=1
+
+        return shortest_path
+
+
+
     
     def stepLeftBtn_click(self):
         if self.cur_step > 0:
@@ -291,7 +322,7 @@ class Maze_Sim(object):
             cur_node = self.closed_set[self.cur_step]
             color = None
             if step_num == 1:
-                color = constants.GREEN
+                color = constants.DARKGREY
             else:
                 color = constants.WHITE
 
@@ -301,16 +332,16 @@ class Maze_Sim(object):
             pygame.display.update()
             self.cur_step += step_num
         
-    def start_animation(self, selected_alg):
-        
 
-        for node in self.closed_set:
-            path_node = pygame.Rect(node.y * self.BLOCK_WIDTH, node.x * self.BLOCK_HEIGHT, self.BLOCK_WIDTH, self.BLOCK_HEIGHT)
-            pygame.draw.rect(self.surface, constants.GREEN, path_node)
+
+    def plot_shortest_path(self, shortest_path):
+        for i in range(len(shortest_path)):
+            path_node = pygame.Rect(shortest_path[len(shortest_path) - i - 1][1] * self.BLOCK_WIDTH, shortest_path[len(shortest_path) - i - 1][0] * self.BLOCK_HEIGHT, self.BLOCK_WIDTH, self.BLOCK_HEIGHT)
+            pygame.draw.rect(self.surface, constants.ORANGE, path_node)
             pygame.display.update()
-            time.sleep(0.1)
-        self.maze.reset()
-        self.draw_maze(self.surface, self.maze)
+        self.draw_grid(self.surface, self.maze)
+        pygame.display.update()
+
 
     def get_alg_result(self, selected_alg):
         closed_set = None
